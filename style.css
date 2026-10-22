@@ -1,0 +1,63 @@
+
+:root{--bg:#dde3ea;--panel:#f4f7fa;--ink:#1a2230;--mute:#566478;--line:#b7c2d0;--ore:#92620a;--cry:#0a7a90;--core:#b4432a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171c26;--panel:#202838;--ink:#e4e9f1;--mute:#8d9ab0;--line:#34405a;--ore:#e3b34f;--cry:#57c7dd;--core:#ff8a65}}
+:root[data-theme="dark"]{--bg:#171c26;--panel:#202838;--ink:#e4e9f1;--mute:#8d9ab0;--line:#34405a;--ore:#e3b34f;--cry:#57c7dd;--core:#ff8a65}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 'Space Grotesk',system-ui,sans-serif;overflow:hidden}
+.scr{height:100%;display:flex;flex-direction:column;gap:10px;padding:12px;max-width:680px;margin:0 auto}
+.hide{display:none!important}
+.bar{display:flex;gap:8px}
+.r{flex:1;background:var(--panel);border-bottom:3px solid var(--c);padding:6px 10px;border-radius:8px}
+.r b{display:block;font-size:20px;color:var(--c)}.r small{color:var(--mute)}
+#vp{flex:1;position:relative;overflow:hidden;border:2px solid var(--line);border-radius:14px;touch-action:none;cursor:grab;background-image:radial-gradient(var(--line) 1.2px,transparent 1.2px);background-size:26px 26px}
+#world{position:absolute;left:0;top:0;width:0;height:0}
+#lines{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+#ctr{position:absolute;right:8px;top:8px;z-index:2;padding:6px 10px;font:600 12px 'Space Grotesk',system-ui,sans-serif;color:var(--ink);background:var(--panel);border:2px solid var(--line);border-radius:8px;cursor:pointer}
+.node{position:absolute;left:0;top:0;width:156px;padding:9px 11px;border:2px solid var(--c);border-radius:12px;background:var(--panel);color:var(--ink);font:600 13px 'Space Grotesk',system-ui,sans-serif;text-align:left;cursor:pointer}
+.node span{display:block;font-weight:400;font-size:12px;color:var(--mute)}
+.node em{display:block;font-style:normal;font-size:12px;margin-top:3px;color:var(--c)}
+.node.poor{opacity:.65}.node.locked{border-style:dashed;opacity:.5}
+.node.ready{box-shadow:0 0 14px var(--c)}
+.node.bought{background:var(--c)}.node.bought *{color:var(--bg)}.node.bought b::before{content:'✓ '}
+.node.new{animation:pin .45s}
+@keyframes pin{from{scale:.6;opacity:0}}
+.node.root{width:100px;text-align:center;cursor:default;--c:var(--ink)}
+#info{color:var(--mute);font-size:13px;text-align:center}
+.big-btn{padding:16px;font:700 18px 'Space Grotesk',system-ui,sans-serif;color:var(--bg);background:var(--ink);border:0;border-radius:30px 30px 10px 30px;cursor:pointer}
+.reset{font-size:12px;color:var(--mute);background:none;border:0;text-decoration:underline;cursor:pointer}
+#tb{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+#tb u{display:block;height:100%;width:100%;background:var(--ore)}
+#field{flex:1;position:relative;overflow:hidden;border-radius:14px;touch-action:manipulation;
+background:radial-gradient(1.5px 1.5px at 30px 40px,#fffa,#0000) 0 0/170px 170px,radial-gradient(1px 1px at 90px 120px,#fff8,#0000) 0 0/110px 130px,radial-gradient(ellipse at 85% 8%,#2a3a66,#0000 55%),radial-gradient(ellipse at 10% 95%,#3a2448,#0000 50%),#0a0e17}
+.ast{position:absolute;left:0;top:0;cursor:crosshair}
+.rk{width:100%;height:100%;--fx:linear-gradient(#0000,#0000);--glow:0 0 0 #0000;animation:spin 10s linear infinite;
+background:radial-gradient(circle at 28% 62%,#0004 0 9%,#0000 10%),radial-gradient(circle at 68% 30%,#0004 0 12%,#0000 13%),radial-gradient(circle at 62% 74%,#0003 0 6%,#0000 7%),var(--fx),radial-gradient(circle at 35% 30%,var(--a1),var(--a2) 72%);
+box-shadow:inset -8px -10px 18px #0007,inset 4px 4px 8px #fff3,var(--glow)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ore .rk{--a1:#a79b8c;--a2:#5a5148}
+.big .rk{--a1:#9fe3f2;--a2:#2f6a86;--fx:conic-gradient(from 20deg,#fff5 0 7%,#0000 7% 32%,#fff3 32% 38%,#0000 38%)}
+.gold .rk{--a1:#ffe58a;--a2:#a8740a;--glow:0 0 20px #ffc83acc}
+.core .rk{--a1:#ff9a62;--a2:#35191b;--glow:0 0 26px #ff6a3d99}
+.hit .rk{filter:brightness(1.8)}
+.hp{position:absolute;left:10%;right:10%;bottom:-9px;height:4px;background:#0008;border-radius:2px;overflow:hidden;opacity:0}
+.hurt .hp{opacity:1}.hp u{display:block;height:100%;width:100%;background:#7ddc7a}
+.pop{position:absolute;pointer-events:none;font-weight:700;text-shadow:0 1px 3px #000;animation:up .8s forwards}
+@keyframes up{to{transform:translateY(-44px);opacity:0}}
+.frag{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;animation:frag .5s forwards}
+@keyframes frag{to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+@media (prefers-reduced-motion:reduce){.rk,.node.new{animation:none}.pop,.frag{animation-duration:.01s}}
+#over{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;background:rgba(10,13,20,.9);color:#e4e9f1;text-align:center;padding:20px}
+#over .big-btn{background:#e4e9f1;color:#171c26}
+.snd{flex:none;width:44px;font-size:18px;background:var(--panel);border:2px solid var(--line);border-radius:8px;cursor:pointer}
+.ring{position:absolute;border:3px solid;border-radius:50%;pointer-events:none;animation:ring .45s forwards}
+@keyframes ring{from{transform:translate(-50%,-50%) scale(.4);opacity:.9}to{transform:translate(-50%,-50%) scale(1.8);opacity:0}}
+.shake{animation:shake .25s}
+@keyframes shake{25%{transform:translate(4px,-3px)}50%{transform:translate(-4px,3px)}75%{transform:translate(3px,2px)}}
+.node:hover:not(.root){border-color:var(--ink)}
+.node em s{text-decoration:none}.node em s.no{opacity:.5}
+.bar .r{min-width:0}
+.stop{flex:none;padding:0 12px;font:600 13px 'Space Grotesk',system-ui,sans-serif;color:var(--ink);background:var(--panel);border:2px solid var(--line);border-radius:8px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.ring,.shake{animation:none}}
+@media (min-width:900px){.scr{max-width:1280px;padding:20px;gap:14px}.r b{font-size:24px}.r small{font-size:14px}.big-btn{align-s

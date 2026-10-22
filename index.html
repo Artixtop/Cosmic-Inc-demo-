@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Колония на астероиде</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#dde3ea;--panel:#f4f7fa;--ink:#1a2230;--mute:#566478;--line:#b7c2d0;--ore:#92620a;--cry:#0a7a90;--core:#b4432a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171c26;--panel:#202838;--ink:#e4e9f1;--mute:#8d9ab0;--line:#34405a;--ore:#e3b34f;--cry:#57c7dd;--core:#ff8a65}}
+:root[data-theme="dark"]{--bg:#171c26;--panel:#202838;--ink:#e4e9f1;--mute:#8d9ab0;--line:#34405a;--ore:#e3b34f;--cry:#57c7dd;--core:#ff8a65}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 'Space Grotesk',system-ui,sans-serif;overflow:hidden}
+.scr{height:100%;display:flex;flex-direction:column;gap:10px;padding:12px;max-width:680px;margin:0 auto}
+.hide{display:none!important}
+.bar{display:flex;gap:8px}
+.r{flex:1;background:var(--panel);border-bottom:3px solid var(--c);padding:6px 10px;border-radius:8px}
+.r b{display:block;font-size:20px;color:var(--c)}.r small{color:var(--mute)}
+#vp{flex:1;position:relative;overflow:hidden;border:2px solid var(--line);border-radius:14px;touch-action:none;cursor:grab;background-image:radial-gradient(var(--line) 1.2px,transparent 1.2px);background-size:26px 26px}
+#world{position:absolute;left:0;top:0;width:0;height:0}
+#lines{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+#ctr{position:absolute;right:8px;top:8px;z-index:2;padding:6px 10px;font:600 12px 'Space Grotesk',system-ui,sans-serif;color:var(--ink);background:var(--panel);border:2px solid var(--line);border-radius:8px;cursor:pointer}
+.node{position:absolute;left:0;top:0;width:156px;padding:9px 11px;border:2px solid var(--c);border-radius:12px;background:var(--panel);color:var(--ink);font:600 13px 'Space Grotesk',system-ui,sans-serif;text-align:left;cursor:pointer}
+.node span{display:block;font-weight:400;font-size:12px;color:var(--mute)}
+.node em{display:block;font-style:normal;font-size:12px;margin-top:3px;color:var(--c)}
+.node.poor{opacity:.65}.node.locked{border-style:dashed;opacity:.5}
+.node.ready{box-shadow:0 0 14px var(--c)}
+.node.bought{background:var(--c)}.node.bought *{color:var(--bg)}.node.bought b::before{content:'✓ '}
+.node.new{animation:pin .45s}
+@keyframes pin{from{scale:.6;opacity:0}}
+.node.root{width:100px;text-align:center;cursor:default;--c:var(--ink)}
+#info{color:var(--mute);font-size:13px;text-align:center}
+.big-btn{padding:16px;font:700 18px 'Space Grotesk',system-ui,sans-serif;color:var(--bg);background:var(--ink);border:0;border-radius:30px 30px 10px 30px;cursor:pointer}
+.reset{font-size:12px;color:var(--mute);background:none;border:0;text-decoration:underline;cursor:pointer}
+#tb{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+#tb u{display:block;height:100%;width:100%;background:var(--ore)}
+#field{flex:1;position:relative;overflow:hidden;border-radius:14px;touch-action:manipulation;
+background:radial-gradient(1.5px 1.5px at 30px 40px,#fffa,#0000) 0 0/170px 170px,radial-gradient(1px 1px at 90px 120px,#fff8,#0000) 0 0/110px 130px,radial-gradient(ellipse at 85% 8%,#2a3a66,#0000 55%),radial-gradient(ellipse at 10% 95%,#3a2448,#0000 50%),#0a0e17}
+.ast{position:absolute;left:0;top:0;cursor:crosshair}
+.rk{width:100%;height:100%;--fx:linear-gradient(#0000,#0000);--glow:0 0 0 #0000;animation:spin 10s linear infinite;
+background:radial-gradient(circle at 28% 62%,#0004 0 9%,#0000 10%),radial-gradient(circle at 68% 30%,#0004 0 12%,#0000 13%),radial-gradient(circle at 62% 74%,#0003 0 6%,#0000 7%),var(--fx),radial-gradient(circle at 35% 30%,var(--a1),var(--a2) 72%);
+box-shadow:inset -8px -10px 18px #0007,inset 4px 4px 8px #fff3,var(--glow)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ore .rk{--a1:#a79b8c;--a2:#5a5148}
+.big .rk{--a1:#9fe3f2;--a2:#2f6a86;--fx:conic-gradient(from 20deg,#fff5 0 7%,#0000 7% 32%,#fff3 32% 38%,#0000 38%)}
+.gold .rk{--a1:#ffe58a;--a2:#a8740a;--glow:0 0 20px #ffc83acc}
+.core .rk{--a1:#ff9a62;--a2:#35191b;--glow:0 0 26px #ff6a3d99}
+.hit .rk{filter:brightness(1.8)}
+.hp{position:absolute;left:10%;right:10%;bottom:-9px;height:4px;background:#0008;border-radius:2px;overflow:hidden;opacity:0}
+.hurt .hp{opacity:1}.hp u{display:block;height:100%;width:100%;background:#7ddc7a}
+.pop{position:absolute;pointer-events:none;font-weight:700;text-shadow:0 1px 3px #000;animation:up .8s forwards}
+@keyframes up{to{transform:translateY(-44px);opacity:0}}
+.frag{position:absolute;width:6px;height:6px;border-radius:50%;pointer-events:none;animation:frag .5s forwards}
+@keyframes frag{to{transform:translate(var(--dx),var(--dy)) scale(.3);opacity:0}}
+@media (prefers-reduced-motion:reduce){.rk,.node.new{animation:none}.pop,.frag{animation-duration:.01s}}
+#over{position:absolute;inset:0;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;background:rgba(10,13,20,.9);color:#e4e9f1;text-align:center;padding:20px}
+#over .big-btn{background:#e4e9f1;color:#171c26}
+.snd{flex:none;width:44px;font-size:18px;background:var(--panel);border:2px solid var(--line);border-radius:8px;cursor:pointer}
+.ring{position:absolute;border:3px solid;border-radius:50%;pointer-events:none;animation:ring .45s forwards}
+@keyframes ring{from{transform:translate(-50%,-50%) scale(.4);opacity:.9}to{transform:translate(-50%,-50%) scale(1.8);opacity:0}}
+.shake{animation:shake .25s}
+@keyframes shake{25%{transform:translate(4px,-3px)}50%{transform:translate(-4px,3px)}75%{transform:translate(3px,2px)}}
+.node:hover:not(.root){border-color:var(--ink)}
+.node em s{text-decoration:none}.node em s.no{opacity:.5}
+.bar .r{min-width:0}
+.stop{flex:none;padding:0 12px;font:600 13px 'Space Grotesk',system-ui,sans-serif;color:var(--ink);background:var(--panel);border:2px solid var(--line);border-radius:8px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.ring,.shake{animation:none}}
+@media (min-width:900px){.scr{max-width:1280px;padding:20px;gap:14px}.r b{font-size:24px}.r small{font-size:14px}.big-btn{align-self:center;min-width:360px}#info{font-size:15px}}
+</style></head><body>
+<div id="hub" class="scr">
+ <div class="bar"><div class="r" style="--c:var(--ore)"><small>Руда ●</small><b id="o">0</b></div>
+ <div class="r hide" id="rc" style="--c:var(--cry)"><small>Кристаллы ◆</small><b id="c">0</b></div>
+ <div class="r hide" id="rk" style="--c:var(--core)"><small>Ядра ✦</small><b id="k">0</b></div><button class="snd"></button></div>
+ <div id="vp"><button id="ctr">К станции</button><div id="world"><svg id="lines" width="1" height="1"></svg></div></div>
+ <div id="info"></div>
+ <button class="big-btn" id="go">Начать добычу</button>
+ <button class="reset" id="rst">Сбросить прогресс</button>
+</div>
+<div id="game" class="scr hide">
+ <div class="bar"><div class="r" style="--c:var(--ink)"><small>Время</small><b id="tm"></b></div>
+ <div class="r" style="--c:var(--ore)"><small>Добыто</small><b id="gain" style="font-size:15px"></b></div>
+ <div class="r hide" id="cbc" style="--c:var(--core)"><small>Комбо</small><b id="cb"></b></div><button class="stop" id="stop">Закончить</button><button class="snd"></button></div>
+ <div id="tb"><u></u></div>
+ <div id="field"><div id="over" class="hide"><h2 style="margin:0">Сессия окончена</h2><div id="res"></div><button class="big-btn" id="back">В лабораторию</button></div></div>
+</div>
+<script>
+const T=[
+{id:'t1',n:'Запас топлива',d:'+3 с к сессии',x:-170,y:0,c:{ore:8},req:[],fx:{time:3}},
+{id:'t2',n:'Топливный бак',d:'+3 с',x:-340,y:0,c:{ore:30},req:['t1'],fx:{time:3}},
+{id:'t3',n:'Кристальные ячейки',d:'+4 с',x:-510,y:0,c:{ore:60,cry:15},req:['t2'],fx:{time:4}},
+{id:'t4',n:'Реактор',d:'+5 с',x:-680,y:0,c:{ore:150,cry:60},req:['t3'],fx:{time:5}},
+{id:'t5',n:'Рекуперация',d:'+0.3 с за каждый сбитый астероид',x:-510,y:-115,c:{ore:80,cry:25},req:['t3'],fx:{tk:.3}},
+{id:'t6',n:'Квантовые часы',d:'+8 с к сессии',x:-850,y:0,c:{ore:300,cry:80,core:4},req:['t4'],fx:{time:8}},
+{id:'d1',n:'Крепкий палец',d:'Урон +1',x:170,y:0,c:{ore:12},req:[],fx:{dmg:1}},
+{id:'d2',n:'Ударник',d:'Урон +1',x:340,y:0,c:{ore:60},req:['d1'],fx:{dmg:1}},
+{id:'d3',n:'Плазменный бур',d:'Урон +2',x:510,y:0,c:{ore:100,cry:20},req:['d2'],fx:{dmg:2}},
+{id:'d4',n:'Меткий глаз',d:'Шанс крита 15% (урон ×3)',x:340,y:-115,c:{ore:120},req:['d2'],fx:{crit:.15}},
+{id:'d5',n:'Резонанс',d:'Шанс крита +20%',x:510,y:-115,c:{ore:200,cry:35},req:['d4'],fx:{crit:.2}},
+{id:'d6',n:'Антиматерия',d:'Урон +3',x:680,y:0,c:{ore:300,cry:50,core:5},req:['d3'],fx:{dmg:3}},
+{id:'i1',n:'Сортировка руды',d:'Руда ×1.5',x:0,y:-115,c:{ore:20},req:[],fx:{ore:1.5}},
+{id:'i2',n:'Кристальные жилы',d:'Появляются крупные астероиды с кристаллами',x:0,y:-235,c:{ore:50},req:['i1'],fx:{big:1}},
+{id:'i3',n:'Огранка',d:'Кристаллы ×2',x:0,y:-355,c:{ore:100,cry:15},req:['i2'],fx:{cry:2}},
+{id:'m3',n:'Ядра астероидов',d:'Появляются тяжёлые астероиды с ядрами',x:0,y:-480,c:{ore:250,cry:40},req:['i3'],fx:{core:1}},
+{id:'m4',n:'Ядерная огранка',d:'Ядра ×2',x:0,y:-600,c:{ore:400,cry:60,core:3},req:['m3'],fx:{corem:2}},
+{id:'k1',n:'Комбо',d:'Сбивай подряд: награда +10% за серию, до ×2',x:170,y:-115,c:{ore:40},req:['i1'],fx:{combo:1}},
+{id:'k2',n:'Азарт',d:'Бонус комбо +5% за серию',x:170,y:-235,c:{ore:90,cry:20},req:['k1'],fx:{cp:.05}},
+{id:'g1',n:'Золотая жила',d:'Иногда летят золотые астероиды: быстрые, но дорогие',x:-170,y:-235,c:{ore:100,cry:20},req:['i2'],fx:{gold:1}},
+{id:'g2',n:'Золотая лихорадка',d:'Золотые астероиды чаще',x:-170,y:-355,c:{ore:200,cry:40},req:['g1'],fx:{gold:1}},
+{id:'s1',n:'Радар',d:'Астероидов на 30% больше',x:0,y:115,c:{ore:15},req:[],fx:{spawn:1.3}},
+{id:'s2',n:'Притяжение',d:'Ещё на 30% больше',x:0,y:235,c:{ore:60,cry:10},req:['s1','i2'],fx:{spawn:1.3}},
+{id:'w1',n:'Ударная волна',d:'Клик задевает соседние астероиды',x:170,y:115,c:{ore:80},req:['d1'],fx:{splash:1}},
+{id:'w2',n:'Большая волна',d:'Радиус волны больше',x:170,y:235,c:{ore:120,cry:25},req:['w1'],fx:{splash:1}},
+{id:'c1',n:'Цепная реакция',d:'Взрыв бьёт соседний астероид',x:340,y:135,c:{ore:150,cry:30},req:['d2','s1'],fx:{chain:1}}];
+const AT={ore:{r:26,hp:3,v:55,o:2,c:0,k:0},big:{r:40,hp:8,v:38,o:5,c:1,k:0},gold:{r:20,hp:2,v:150,o:25,c:0,k:0},core:{r:56,hp:20,v:26,o:8,c:2,k:1}};
+const COL={ore:'#8f857a',big:'#6fc5dc',gold:'#ffd54a',core:'#ff7a45'};
+const KEY='asteroid-colony-v2',$=id=>document.getElementById(id),NM={ore:'руды',cry:'кристаллов',core:'ядер'};
+const fresh=()=>({ore:0,cry:0,core:0,tech:{}});let S=fresh();
+try{const x=JSON.parse(localStorage.getItem(KEY));if(x&&x.tech)S=Object.assign(S,x)}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+function st(){const o={time:15,dmg:1,ore:1,cry:1,spawn:1,big:0,chain:0,crit:0,tk:0,combo:0,cp:.1,splash:0,gold:0,core:0,corem:1};
+ T.forEach(t=>{if(S.tech[t.id])for(const k in t.fx){if(['ore','cry','spawn','corem'].includes(k))o[k]*=t.fx[k];else o[k]+=t.fx[k]}});return o}
+const fmt=n=>n<1000?''+Math.floor(n):(n/1000).toFixed(1)+'K';
+const cstr=c=>Object.entries(c).map(([k,v])=>v+' '+NM[k]).join(' + ');
+const can=c=>Object.entries(c).every(([k,v])=>S[k]>=v);
+// ---- sound
+let AC=null,mute=false;try{mute=localStorage.getItem('ac-mute')=='1'}catch(e){}
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state=='suspended')AC.resume();return AC}
+function tone(f,d,type='sine',v=.15,f2=0,delay=0){if(mute)return;const c=ac();if(!c)return;const t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
+ o.type=type;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+ g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g).connect(c.destination);o.start(t);o.stop(t+d)}
+function noise(d,v=.2,f0=2000,f1=200){if(mute)return;const c=ac();if(!c)return;const n=c.sampleRate*d|0,b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0);
+ for(let i=0;i<n;i++)a[i]=Math.random()*2-1;const s=c.createBufferSource(),fl=c.createBiquadFilter(),g=c.createGain(),t=c.currentTime;
+ s.buffer=b;fl.type='lowpass';fl.frequency.setValueAtTime(f0,t);fl.frequency.exponentialRampToValueAtTime(f1,t+d);
+ g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);s.connect(fl).connect(g).connect(c.destination);s.start(t)}
+const SFX={
+ hit:(c=0)=>tone(260+c*25+Math.random()*40,.06,'square',.05,140),
+ crit:()=>tone(700,.12,'sawtooth',.07,1400),
+ kill:ty=>{const b=ty=='core'?1:ty=='big'?.7:.4;noise(.18+b*.25,.22,2500,120);tone(120,.2+b*.2,'sine',.25,45);
+  if(ty=='gold'){tone(1200,.15,'sine',.1);tone(1600,.2,'sine',.1,0,.08);tone(2000,.25,'sine',.08,0,.16)}},
+ buy:()=>{tone(520,.12,'triangle',.12);tone(780,.18,'triangle',.12,0,.09)},
+ start:()=>tone(300,.25,'triangle',.12,700),
+ end:()=>{tone(520,.2,'triangle',.12);tone(390,.2,'triangle',.12,0,.15);tone(260,.35,'triangle',.12,0,.3)}};
+const snds=[...document.querySelectorAll('.snd')],ico=()=>snds.forEach(b=>b.textContent=mute?'🔇':'🔊');
+snds.forEach(b=>b.onclick=()=>{mute=!mute;try{localStorage.setItem('ac-mute',mute?'1':'0')}catch(e){}ico();SFX.buy()});ico();
+// ---- tree
+const vp=$('vp'),world=$('world'),NS='http://www.w3.org/2000/svg';let tx=0,ty=0,drag=null,moved=false,L=[],seen=new Set(),init=false;
+const pos=id=>id=='root'?{x:0,y:0}:T.find(t=>t.id==id);
+const rt=document.createElement('div');rt.className='node root bought';rt.textContent='Станция';rt.style.transform='translate(-50%,-50%)';world.appendChild(rt);
+T.forEach(t=>{
+ (t.req.length?t.req:['root']).forEach(p=>{const a=pos(p),l=document.createElementNS(NS,'line');
+  l.setAttribute('x1',a.x);l.setAttribute('y1',a.y);l.setAttribute('x2',t.x);l.setAttribute('y2',t.y);l.setAttribute('stroke-width',3);
+  $('lines').appendChild(l);L.push([l,t.id,p])});
+ const b=document.createElement('button');b.className='node hide';b.id='k-'+t.id;
+ b.style.cssText=`--c:var(${t.c.core?'--core':t.c.cry?'--cry':'--ore'});transform:translate(calc(${t.x}px - 50%),calc(${t.y}px - 50%))`;
+ b.innerHTML=`<b>${t.n}</b><span>${t.d}</span><em>${cstr(t.c)}</em>`;
+ b.onclick=()=>{if(moved){moved=false;return}
+  if(!S.tech[t.id]&&t.req.every(r=>S.tech[r])&&can(t.c)){for(const k in t.c)S[k]-=t.c[k];S.tech[t.id]=1;save();render();SFX.buy()}};
+ world.appendChild(b)});
+function place(){world.style.transform=`translate(${tx}px,${ty}px)`}
+function center(){tx=vp.clientWidth/2;ty=vp.clientHeight/2;place()}
+$('ctr').onclick=center;
+vp.addEventListener('wheel',e=>{e.preventDefault();tx-=e.deltaX;ty-=e.deltaY;place()},{passive:false});
+vp.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,tx,ty,id:e.pointerId};moved=false});
+vp.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
+ if(!moved&&Math.hypot(dx,dy)>6){moved=true;try{vp.setPointerCapture(drag.id)}catch(_){}}
+ if(moved){tx=drag.tx+dx;ty=drag.ty+dy;place()}});
+['pointerup','pointercancel'].forEach(n=>vp.addEventListener(n,()=>{drag=null}));
+function render(){const s=st();
+ $('o').textContent=fmt(S.ore);$('c').textContent=fmt(S.cry);$('k').textContent=fmt(S.core);
+ $('rc').classList.toggle('hide',!(s.big||S.cry>0));$('rk').classList.toggle('hide',!(s.core||S.core>0));
+ $('info').textContent=`Сессия ${s.time} с · урон ${s.dmg}`+(s.crit?` · крит ${Math.round(s.crit*100)}%`:'');
+ T.forEach(t=>{const e=$('k-'+t.id),all=t.req.every(r=>S.tech[r]),vis=!t.req.length||t.req.some(r=>S.tech[r]),b=!!S.tech[t.id];
+  e.classList.toggle('hide',!vis);
+  if(vis&&!seen.has(t.id)){seen.add(t.id);if(init)e.classList.add('new')}
+  e.classList.toggle('bought',b);e.classList.toggle('locked',!all&&!b);
+  e.classList.toggle('ready',all&&!b&&can(t.c));if(vis&&!b)e.lastChild.innerHTML=Object.entries(t.c).map(([k,v])=>`<s class="${S[k]>=v?'ok':'no'}">${v} ${NM[k]}</s>`).join(' + ');e.classList.toggle('poor',all&&!b&&!can(t.c))});
+ L.forEach(([l,id,p])=>{l.style.display=p=='root'||S.tech[p]?'':'none';l.setAttribute('stroke',S.tech[id]?'var(--ink)':'var(--line)')});init=true}
+let armed=false;
+$('rst').onclick=()=>{if(!armed){armed=true;$('rst').textContent='Нажми ещё раз, чтобы стереть всё';return}
+ armed=false;$('rst').textContent='Сбросить прогресс';S=fresh();save();render()};
+// ---- session
+const F=$('field');let A=[],run=null;
+function show(g){$('hub').classList.toggle('hide',g);$('game').classList.toggle('hide',!g)}
+$('go').onclick=()=>{show(true);const s=st();run={sc:Math.max(1,Math.min(1.7,F.clientWidth/650)),t:s.time,t0:s.time,ore:0,cry:0,core:0,sp:0,cb:0,ct:9,s,last:performance.now()};
+ $('cbc').classList.toggle('hide',!s.combo);SFX.start();A.forEach(a=>a.el.remove());A=[];$('over').classList.add('hide');requestAnimationFrame(loop)};
+$('back').onclick=()=>{show(false);render();center()};
+$('stop').onclick=()=>{if(run)finish()};
+addEventListener('keydown',e=>{if(e.key=='Escape'&&run)finish()});
+const mv=a=>a.el.style.transform=`translate(${a.x-a.r}px,${a.y-a.r}px)`;
+function mk(){const s=run.s,g=.05*s.gold,c=s.core?.12:0,b=s.big?.3:0,q=Math.random();
+ const ty=q<g?'gold':q<g+c?'core':q<g+c+b?'big':'ore',p=AT[ty],r=p.r*run.sc,W=F.clientWidth,H=F.clientHeight,d=Math.random()<.5?-1:1,sp=p.v*run.sc*(.7+Math.random()*.6);
+ const el=document.createElement('div');el.className='ast '+ty;el.style.width=el.style.height=2*r+'px';
+ el.innerHTML='<div class="rk"></div><i class="hp"><u></u></i>';
+ const k=el.firstChild,rb=()=>40+Math.random()*20;
+ k.style.borderRadius=`${rb()}% ${rb()}% ${rb()}% ${rb()}% / ${rb()}% ${rb()}% ${rb()}% ${rb()}%`;
+ k.style.animationDuration=6+Math.random()*10+'s';if(Math.random()<.5)k.style.animationDirection='reverse';
+ const a={el,bar:el.lastChild.firstChild,ty,p,x:d<0?-r:W+r,y:r+Math.random()*(H-2*r),vx:-d*sp,vy:(Math.random()-.5)*(ty=='gold'?120:30),r,hp:p.hp,max:p.hp};
+ el.addEventListener('pointerdown',e=>{e.preventDefault();run&&click(a)});F.appendChild(el);A.push(a);mv(a)}
+function pop(a,t,col,dy=0){const p=document.createElement('div');p.className='pop';p.textContent=t;p.style.cssText=`left:${a.x}px;top:${a.y+dy}px;color:${col}`;F.appendChild(p);setTimeout(()=>p.remove(),800)}
+function burst(a){const n={ore:8,big:12,gold:14,core:18}[a.ty];
+ for(let i=0;i<n;i++){const f=document.createElement('i'),g=Math.random()*6.28,d=a.r*(1+Math.random()*1.4),z=3+Math.random()*5;f.className='frag';
+  f.style.cssText=`left:${a.x}px;top:${a.y}px;width:${z}px;height:${z}px;--dx:${Math.cos(g)*d}px;--dy:${Math.sin(g)*d}px;background:${COL[a.ty]}`;F.appendChild(f);setTimeout(()=>f.remove(),550)}
+ const rg=document.createElement('i');rg.className='ring';rg.style.cssText=`left:${a.x}px;top:${a.y}px;width:${a.r*2}px;height:${a.r*2}px;border-color:${COL[a.ty]}`;F.appendChild(rg);setTimeout(()=>rg.remove(),450);
+ if(a.ty=='core'||a.ty=='big'){F.classList.remove('shake');void F.offsetWidth;F.classList.add('shake')}}
+function click(a){const s=run.s,cr=Math.random()<s.crit,x=a.x,y=a.y;if(cr)pop(a,'КРИТ!','#ff7a59',-24);cr?SFX.crit():SFX.hit(run.cb);
+ hit(a,s.dmg*(cr?3:1));
+ if(s.splash){const R=(40+35*s.splash)*run.sc;A.slice().forEach(b=>{if(b!==a&&!b.dead&&Math.hypot(b.x-x,b.y-y)<R+b.r)hit(b,Math.max(1,s.dmg>>1))})}}
+function hit(a,d){if(!run||a.dead)return;a.hp-=d;a.bar.style.width=Math.max(0,a.hp/a.max*100)+'%';a.el.classList.add('hit','hurt');setTimeout(()=>a.el.classList.remove('hit'),80);if(a.hp<=0)kill(a)}
+function kill(a){a.dead=true;a.el.remove();A=A.filter(b=>b!==a);const s=run.s,p=a.p;
+ if(s.combo){run.cb=run.ct<2?Math.min(10,run.cb+1):1;run.ct=0}
+ const m=1+(s.combo?run.cb*s.cp:0),o=Math.max(1,Math.round(p.o*s.ore*m)),c=p.c?Math.max(1,Math.round(p.c*s.cry*m)):0,k=p.k?Math.max(1,Math.round(p.k*s.corem*m)):0;
+ run.ore+=o;run.cry+=c;run.core+=k;run.t+=s.tk;SFX.kill(a.ty);
+ pop(a,'+'+o+' ●','#e3b34f');if(c)pop(a,'+'+c+' ◆','#57c7dd',18);if(k)pop(a,'+'+k+' ✦','#ff8a65',36);burst(a);
+ if(s.chain&&A.length){const n=A.reduce((m,b)=>Math.hypot(b.x-a.x,b.y-a.y)<Math.hypot(m.x-a.x,m.y-a.y)?b:m);hit(n,1)}}
+function loop(now){if(!run)return;const dt=Math.min((now-run.last)/1000,.1);run.last=now;run.t-=dt;run.ct+=dt;if(run.ct>=2)run.cb=0;
+ run.sp-=dt;if(run.sp<=0){mk();run.sp=.9/run.s.spawn/run.sc*(.7+Math.random()*.6)}
+ const W=F.clientWidth,H=F.clientHeight;
+ A.forEach(a=>{a.x+=a.vx*dt;a.y+=a.vy*dt;if(a.y<a.r||a.y>H-a.r)a.vy*=-1;mv(a)});
+ A=A.filter(a=>{const gone=a.x<-a.r-20||a.x>W+a.r+20;if(gone)a.el.remove();return!gone});
+ $('tm').textContent=Math.max(run.t,0).toFixed(1)+' с';$('tb').firstChild.style.width=Math.min(100,Math.max(0,run.t)/run.t0*100)+'%';
+ $('cb').textContent=run.cb?'×'+(1+run.cb*run.s.cp).toFixed(2):'—';
+ $('gain').textContent=`${run.ore} ●`+(run.cry?` · ${run.cry} ◆`:'')+(run.core?` · ${run.core} ✦`:'');
+ if(run.t<=0)return finish();requestAnimationFrame(loop)}
+function finish(){const r=run;run=null;SFX.end();A.forEach(a=>a.el.remove());A=[];S.ore+=r.ore;S.cry+=r.cry;S.core+=r.core;save();
+ $('res').textContent=`Руда +${r.ore}`+(r.s.big?` · Кристаллы +${r.cry}`:'')+(r.s.core?` · Ядра +${r.core}`:'');$('over').classList.remove('hide')}
+render();requestAnimationFrame(center);addEventListener('resize',()=>{if(!$('hub').classList.contains('hide'))center()});
+</script></body></html>
